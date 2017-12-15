@@ -125,6 +125,18 @@ int main( int argc, char *argv[] )
 	  Error::Message(e.what());
   }
 
+  // Truong addded 15/12/2017: write grid in tecplot format
+  cout << " Writing grid data in tecplot format ..." << endl << endl;
+
+  try
+  {
+	  solver.geometry.Visualize_grid_tecplot();
+  }
+  catch (exception &e)
+  {
+	  Error::Message(e.what());
+  }
+
   // generate edge list
 
   cout << " Generating edge list ..." << endl << endl;
