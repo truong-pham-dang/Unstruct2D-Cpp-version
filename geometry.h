@@ -135,6 +135,7 @@ public:
   int  GetNumberBoundNodes( int btypeFrom, int btypeTo ) const;
   void ReadGrid();
   void Visualize_grid_vtk(); // Truong ajoute 14/12/2017
+  void Visualize_grid_tecplot(); // Truong ajoute 15/12/2017
 
 private:
 
