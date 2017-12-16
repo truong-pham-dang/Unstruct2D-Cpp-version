@@ -186,4 +186,81 @@ void Output::Flowfield( const Geometry &geometry, const FluidProps &fluidProps,
   }
 
   stream.close();
+
+  // Truong ajoute 16/12/2017
+  // contour file in vtk format
+  string fname_vtk = fnameFlow + str.str() + ".vtk";
+  ofstream outfile(fname_vtk);
+  outfile.setf(ios::fixed, ios::floatfield);
+  outfile.precision(10);
+  outfile << "# vtk DataFile Version 2.0" << endl;
+  outfile << "VTK Format for unstructured grid" << endl;
+  outfile << "ASCII" << endl;
+  outfile << "DATASET UNSTRUCTURED_GRID" << endl;
+  outfile << "POINTS " << geometry.nndInt << " float" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << setw(15) << geometry.coords[i].x << setw(15) << geometry.coords[i].y << setw(15) << 0.0f << endl;
+  }
+  outfile << "CELLS " << geometry.nTria << " " << 4 * geometry.nTria << endl;
+  for (int i = 0; i < geometry.nTria; i++)
+  {
+	  outfile << 3 << " " << geometry.tria[i].node[0] << " " << geometry.tria[i].node[1] << " " << geometry.tria[i].node[2] << " " << endl;
+  }
+  outfile << "CELL_TYPES " << geometry.nTria << endl;
+  for (int i = 0; i < geometry.nTria; i++)
+  {
+	  outfile << 5 << endl;
+  }
+  outfile << "POINT_DATA " << geometry.nndInt << endl; 
+
+  //Density
+  outfile << "SCALARS RHO double" << endl; 
+  outfile << "LOOKUP_TABLE default" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << fluidProps.cv[i].dens << endl;
+  }
+
+  //u-velocity
+  outfile << "SCALARS U double" << endl;
+  outfile << "LOOKUP_TABLE default" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << fluidProps.cv[i].xmom/fluidProps.cv[i].dens << endl;
+  }
+
+  //v-velocity
+  outfile << "SCALARS V double" << endl;
+  outfile << "LOOKUP_TABLE default" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << fluidProps.cv[i].ymom / fluidProps.cv[i].dens << endl;
+  }
+
+  //Velocity magnitude
+  outfile << "SCALARS Velocity_magnitude double" << endl;
+  outfile << "LOOKUP_TABLE default" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << SQRT((fluidProps.cv[i].xmom / fluidProps.cv[i].dens)*(fluidProps.cv[i].xmom / fluidProps.cv[i].dens) + (fluidProps.cv[i].ymom / fluidProps.cv[i].dens)*(fluidProps.cv[i].ymom / fluidProps.cv[i].dens)) << endl;
+  }
+
+  //Pressure
+  outfile << "SCALARS P double" << endl;
+  outfile << "LOOKUP_TABLE default" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << fluidProps.dv[i].press << endl;
+  }
+
+  //Temperature
+  outfile << "SCALARS T double" << endl;
+  outfile << "LOOKUP_TABLE default" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile << fluidProps.dv[i].temp << endl;
+  }
+
+  outfile.close();
 }
