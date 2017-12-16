@@ -263,4 +263,81 @@ void Output::Flowfield( const Geometry &geometry, const FluidProps &fluidProps,
   }
 
   outfile.close();
+
+  // Truong ajoute 16/12/2017
+  // contour file in tecplot format
+  string fname_tecplot = fnameFlow + str.str() + ".dat";
+  ofstream outfile1(fname_tecplot);
+  outfile1.setf(ios::fixed, ios::floatfield);
+  outfile1.precision(10);
+  outfile1 << "VARIABLES=X,Y,RHO,U,V,VELOCITY_MAGNITUDE,P,T" << endl;
+  outfile1 << "ZONE T=\"UNSTRUCTURED - COUNTOUR\"" << endl; 
+  outfile1 << "ZONETYPE=FEPOLYGON" << endl;
+  outfile1 << "NODES= " << geometry.nndInt << endl;
+  outfile1 << "ELEMENTS= " << geometry.nTria << endl; 
+  outfile1 << "FACES= " << 3 * geometry.nTria << endl;
+  outfile1 << "NumConnectedBoundaryFaces=0" << endl;
+  outfile1 << "TotalNumBoundaryConnections=0" << endl;
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << geometry.coords[i].x << endl;
+  }
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << geometry.coords[i].y << endl;
+  }
+
+  //Density
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << fluidProps.cv[i].dens << endl;
+  }
+
+  //u-velocity
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << fluidProps.cv[i].xmom / fluidProps.cv[i].dens << endl;
+  }
+
+  //v-velocity
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << fluidProps.cv[i].ymom / fluidProps.cv[i].dens << endl;
+  }
+
+  //Velocity magnitude
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << SQRT((fluidProps.cv[i].xmom / fluidProps.cv[i].dens)*(fluidProps.cv[i].xmom / fluidProps.cv[i].dens) + (fluidProps.cv[i].ymom / fluidProps.cv[i].dens)*(fluidProps.cv[i].ymom / fluidProps.cv[i].dens)) << endl;
+  }
+
+  //Pressure
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << fluidProps.dv[i].press << endl;
+  }
+
+  //Temperature
+  for (int i = 0; i < geometry.nndInt; i++)
+  {
+	  outfile1 << fluidProps.dv[i].temp << endl;
+  }
+
+  //Node indexes
+  for (int i = 0; i < geometry.nTria; i++)
+  {
+	  outfile1 << setw(8) << geometry.tria[i].node[0] + 1 << setw(8) << geometry.tria[i].node[1] + 1 << endl;
+	  outfile1 << setw(8) << geometry.tria[i].node[1] + 1 << setw(8) << geometry.tria[i].node[2] + 1 << endl;
+	  outfile1 << setw(8) << geometry.tria[i].node[2] + 1 << setw(8) << geometry.tria[i].node[0] + 1 << endl;
+  }
+
+  for (int i = 0; i < geometry.nTria; i++)
+  {
+	  outfile1 << setw(8) << i + 1 << setw(8) << i + 1 << setw(8) << i + 1 << endl;
+  }
+  for (int i = 0; i < geometry.nTria; i++)
+  {
+	  outfile1 << setw(8) << 0 << setw(8) << 0 << setw(8) << 0 << endl;
+  }
+  outfile1.close();
 }
